@@ -1,2 +1,5 @@
-
 keys.py
+.ftpconfig
+.cache-cblewisnj
+__pycache__/
+*.pyc
