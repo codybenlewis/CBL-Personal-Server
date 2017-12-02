@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, render_template, Markup
 import mbta
 import spotify
+import lights
 
 
 app = Flask(__name__)
@@ -40,6 +41,7 @@ def mbtastation(station=False):
 
     # Error handling for incorrect format entry
     if reformat:
+        reformat = reformat.lower()
         if reformat != 'lcd':
             return  directory('Invalid Format. ' + warning, 'mbta.html')
 
@@ -74,26 +76,65 @@ def spotifyindex():
     return render_template('spotify.html')
 
 
-@app.route('/spotify/recent')
+@app.route('/spotify/recent', methods=['GET'])
 def spotifyrecent():
+    reformat = request.args.get('format', default=False)
     token = spotify.gettoken()
+
+    if reformat:
+        reformat = reformat.lower()
+        if reformat != 'sentence':
+            return directory('Invalid Format. ', 'spotify.html')
 
     if token:
         results = {}
-        results.update(spotify.recent(token))
+        results.update(spotify.recent(token, reformat))
         return jsonify(results)
     return directory('No Token Returned', 'spotify.html')
 
 
-@app.route('/spotify/current')
+@app.route('/spotify/current', methods=['GET'])
 def spotifycurrent():
+    reformat = request.args.get('format', default=False)
     token = spotify.gettoken()
-    
+
+    if reformat:
+        reformat = reformat.lower()
+        if reformat != 'sentence':
+            return directory('Invalid Format. ', 'spotify.html')
+
     if token:
         results = {}
-        results.update(spotify.current(token))
+        results.update(spotify.current(token, reformat))
         return jsonify(results)
-    return directory('No Token Returned', 'spotify.html')
+    return directory('No Token Returned. ', 'spotify.html')
+
+
+@app.route('/lights/')
+def lightsindex():
+    return render_template('lights.html')
+
+
+@app.route('/lights/on')
+def lightson():
+    result = {}
+    state = lights.on()
+    return jsonify({'state': state.lower()})
+
+
+@app.route('/lights/off')
+def lightsoff():
+    result = {}
+    state = lights.off()
+    return jsonify({'state': state.lower()})
+
+
+@app.route('/lights/invert')
+def lightsinvert():
+    result = {}
+    state = lights.invert()
+    #return ('The Lights Are ' + state.capitalize() + '.')
+    return jsonify({'state': state.lower()})
 
 
 if __name__ == '__main__':
