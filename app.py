@@ -1,10 +1,18 @@
 from flask import Flask, jsonify, request, render_template, Markup
+import wtforms
 import mbta
 import spotify
 import lights
+import keys
 
 
 app = Flask(__name__)
+
+#
+#
+#   GENERAL FUNCTIONS
+#
+#
 
 
 def directory(error_input = None, filename = 'index.html'):
@@ -13,9 +21,133 @@ def directory(error_input = None, filename = 'index.html'):
     return render_template(filename, error = Markup('<b>Error:</b> ') + error_input + 'Hello, Lady!')
 
 
+def validate(entry, password):
+    if entry.lower() == password:
+        return True
+    return False
+
+
+#
+#
+#   INDEX PAGE
+#
+#
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+#
+#
+#   LIGHTS
+#
+#
+
+
+@app.route('/lights/', methods=['GET'])
+def lightsindex():
+    password = request.args.get('password', default="")
+    if validate(password, keys.lightspassword):
+        return render_template('lights.html', key = password)
+    return directory('Invalid password. ', 'index.html')
+
+
+@app.route('/lights/on', methods=['GET'])
+def lightson():
+    password = request.args.get('password', default="")
+    if validate(password, keys.lightspassword):
+        result = {}
+        state = lights.on()
+        return jsonify({'state': state.lower()})
+    return directory('Invalid password. ', 'index.html')
+
+
+@app.route('/lights/off', methods=['GET'])
+def lightsoff():
+    password = request.args.get('password', default="")
+    if validate(password, keys.lightspassword):
+        result = {}
+        state = lights.off()
+        return jsonify({'state': state.lower()})
+    return directory('Invalid password. ', 'index.html')
+
+
+@app.route('/lights/invert', methods=['GET'])
+def lightsinvert():
+    password = request.args.get('password', default="")
+    if validate(password, keys.lightspassword):
+        result = {}
+        state = lights.invert()
+        #return ('The Lights Are ' + state.capitalize() + '.')
+        return jsonify({'state': state.lower()})
+    return directory('Invalid password. ', 'index.html')
+
+
+#
+#
+#   Soundboard
+#
+#
+
+
+@app.route('/soundboard/')
+def soundboard():
+    return render_template('soundboard.html')
+
+
+#
+#
+#   SPOTIFY
+#
+#
+
+
+@app.route('/spotify/')
+def spotifyindex():
+    return render_template('spotify.html')
+
+
+@app.route('/spotify/recent', methods=['GET'])
+def spotifyrecent():
+    reformat = request.args.get('format', default=False)
+    token = spotify.gettoken()
+
+    if reformat:
+        reformat = reformat.lower()
+        if reformat != 'sentence':
+            return directory('Invalid Format. ', 'spotify.html')
+
+    if token:
+        results = {}
+        results.update(spotify.recent(token, reformat))
+        return jsonify(results)
+    return directory('No Token Returned', 'spotify.html')
+
+
+@app.route('/spotify/current', methods=['GET'])
+def spotifycurrent():
+    reformat = request.args.get('format', default=False)
+    token = spotify.gettoken()
+
+    if reformat:
+        reformat = reformat.lower()
+        if reformat != 'sentence':
+            return directory('Invalid Format. ', 'spotify.html')
+
+    if token:
+        results = {}
+        results.update(spotify.current(token, reformat))
+        return jsonify(results)
+    return directory('No Token Returned. ', 'spotify.html')
+
+
+#
+#
+#   MBTA
+#
+#
 
 
 @app.route('/mbta/')
@@ -70,71 +202,6 @@ def mbtastation(station=False):
     results.update({'eastbound':mbta.compile_data(source, 'Eastbound', reformat)})
     return jsonify(results)
 
-
-@app.route('/spotify/')
-def spotifyindex():
-    return render_template('spotify.html')
-
-
-@app.route('/spotify/recent', methods=['GET'])
-def spotifyrecent():
-    reformat = request.args.get('format', default=False)
-    token = spotify.gettoken()
-
-    if reformat:
-        reformat = reformat.lower()
-        if reformat != 'sentence':
-            return directory('Invalid Format. ', 'spotify.html')
-
-    if token:
-        results = {}
-        results.update(spotify.recent(token, reformat))
-        return jsonify(results)
-    return directory('No Token Returned', 'spotify.html')
-
-
-@app.route('/spotify/current', methods=['GET'])
-def spotifycurrent():
-    reformat = request.args.get('format', default=False)
-    token = spotify.gettoken()
-
-    if reformat:
-        reformat = reformat.lower()
-        if reformat != 'sentence':
-            return directory('Invalid Format. ', 'spotify.html')
-
-    if token:
-        results = {}
-        results.update(spotify.current(token, reformat))
-        return jsonify(results)
-    return directory('No Token Returned. ', 'spotify.html')
-
-
-@app.route('/lights/')
-def lightsindex():
-    return render_template('lights.html')
-
-
-@app.route('/lights/on')
-def lightson():
-    result = {}
-    state = lights.on()
-    return jsonify({'state': state.lower()})
-
-
-@app.route('/lights/off')
-def lightsoff():
-    result = {}
-    state = lights.off()
-    return jsonify({'state': state.lower()})
-
-
-@app.route('/lights/invert')
-def lightsinvert():
-    result = {}
-    state = lights.invert()
-    #return ('The Lights Are ' + state.capitalize() + '.')
-    return jsonify({'state': state.lower()})
 
 
 if __name__ == '__main__':

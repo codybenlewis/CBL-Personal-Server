@@ -2,8 +2,6 @@ from pyHS100 import SmartPlug
 import keys
 
 plug = SmartPlug(keys.lightsip)
-print("Current state: %s" % plug.state)
-
 
 def on():
     plug.turn_on()
