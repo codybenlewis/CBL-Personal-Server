@@ -3,3 +3,6 @@ keys.py
 .cache-cblewisnj
 __pycache__/
 *.pyc
+pyvenv.cfg
+access.log
+libraries/

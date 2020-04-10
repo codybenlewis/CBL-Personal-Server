@@ -1,3 +1,4 @@
+import pyHS100
 from pyHS100 import SmartPlug
 import keys
 
