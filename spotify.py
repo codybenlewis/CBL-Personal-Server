@@ -11,7 +11,31 @@ def gettoken():
     return token
 
 
-def current(token):
+def recent(token, reformat):
+    sp = spotipy.Spotify(auth=token)
+    data = sp.current_user_recently_played(limit = 25)
+    recent = {}
+    results = []
+
+    index = 0
+    for i in data['items']:
+        track = i['track']
+        title = track['name']
+        artist = track['artists'][0]['name']
+        album = track['album']['name']
+        played_at = i['played_at']
+        # Preview = i['preview_url']
+        results.append({'title': title, 'artist': artist, 'album': album})
+
+        if reformat == 'sentence':
+            results[index] = title + ' by ' + artist
+            index = index + 1
+
+    recent.update({'recent': results})
+    return recent
+
+
+def current(token, reformat):
     sp = spotipy.Spotify(auth=token)
     current = {'current': None}
 
@@ -25,27 +49,13 @@ def current(token):
         title = item['name']
         artist = item['artists'][0]['name']
         album = item['album']['name']
-        time = (data['progress_ms']/1000)
+        # progress = int(data['progress_ms'] / (item['duration_ms']*1.00) * 100)
         playing = data['is_playing']
         # Preview = i['preview_url']
-        result = {'title': title, 'artist': artist, 'album': album, 'progress': time, 'playing': playing}
+        result = {'title': title, 'artist': artist, 'album': album, 'playing': playing}
+
+        if reformat == 'sentence':
+            result = title + ' by ' + artist
+
         current.update({'current': result})
     return current
-
-
-def recent(token):
-    sp = spotipy.Spotify(auth=token)
-    data = sp.current_user_recently_played(limit = 25)
-    recent = {}
-    results = []
-
-    for i in data['items']:
-        track = i['track']
-        title = track['name']
-        artist = track['artists'][0]['name']
-        album = track['album']['name']
-        played_at = i['played_at']
-        # Preview = i['preview_url']
-        results.append({'title': title, 'artist': artist, 'album': album, 'timestamp': played_at})
-    recent.update({'recent': results})
-    return recent
