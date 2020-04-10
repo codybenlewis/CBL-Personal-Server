@@ -24,8 +24,9 @@ def recent(token, reformat):
         artist = track['artists'][0]['name']
         album = track['album']['name']
         played_at = i['played_at']
+        link = track['artists'][0]['external_urls']['spotify']
         # Preview = i['preview_url']
-        results.append({'title': title, 'artist': artist, 'album': album})
+        results.append({'title': title, 'artist': artist, 'album': album, 'link': link, 'timestamp': played_at})
 
         if reformat == 'sentence':
             results[index] = title + ' by ' + artist
@@ -49,10 +50,11 @@ def current(token, reformat):
         title = item['name']
         artist = item['artists'][0]['name']
         album = item['album']['name']
+        link = item['artists'][0]['external_urls']['spotify']
         # progress = int(data['progress_ms'] / (item['duration_ms']*1.00) * 100)
         playing = data['is_playing']
         # Preview = i['preview_url']
-        result = {'title': title, 'artist': artist, 'album': album, 'playing': playing}
+        result = {'title': title, 'artist': artist, 'album': album, 'playing': playing, 'link': link}
 
         if reformat == 'sentence':
             result = title + ' by ' + artist
