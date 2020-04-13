@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, render_template, Markup
+from flask_cors import CORS
 import mbta
 import spotify
 import lights
@@ -7,7 +8,9 @@ import keys
 
 app = Flask(__name__)
 
-#
+# CORS allows for cross origin requests from codybenlewis.com queries
+
+cors = CORS(app)
 #
 #   GENERAL FUNCTIONS
 #
