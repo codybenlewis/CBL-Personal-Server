@@ -19,17 +19,18 @@ def recent(token, reformat):
 
     index = 0
     for i in data['items']:
-        track = i['track']
-        title = track['name']
-        artist = track['artists'][0]['name']
-        album = track['album']['name']
+        item = i['track']
+        track = item['name']
+        artist = item['artists'][0]['name']
+        album = item['album']['name']
         played_at = i['played_at']
-        link = track['external_urls']['spotify']
+        track_link = item['external_urls']['spotify']
+        artist_link = item['artists'][0]['external_urls']['spotify']
         # Preview = i['preview_url']
-        results.append({'title': title, 'artist': artist, 'album': album, 'link': link, 'timestamp': played_at})
+        results.append({'track': track, 'artist': artist, 'album': album, 'track_link': track_link, 'artist_link': artist_link, 'timestamp': played_at})
 
         if reformat == 'sentence':
-            results[index] = title + ' by ' + artist
+            results[index] = track + ' by ' + artist
             index = index + 1
 
     recent.update({'recent': results})
@@ -47,17 +48,18 @@ def current(token, reformat):
 
     if data:
         item = data['item']
-        title = item['name']
+        track = item['name']
         artist = item['artists'][0]['name']
         album = item['album']['name']
-        link = item['external_urls']['spotify']
+        track_link = item['external_urls']['spotify']
+        artist_link = item['artists'][0]['external_urls']['spotify']
         # progress = int(data['progress_ms'] / (item['duration_ms']*1.00) * 100)
         playing = data['is_playing']
         # Preview = i['preview_url']
-        result = {'title': title, 'artist': artist, 'album': album, 'playing': playing, 'link': link}
+        result = {'track': track, 'artist': artist, 'album': album, 'playing': playing, 'track_link': track_link, 'artist_link': artist_link}
 
         if reformat == 'sentence':
-            result = title + ' by ' + artist
+            result = track + ' by ' + artist
 
         current.update({'current': result})
     return current
