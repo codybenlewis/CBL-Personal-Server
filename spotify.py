@@ -12,6 +12,7 @@ def gettoken():
 
 
 def recent(token, reformat):
+
     sp = spotipy.Spotify(auth=token)
     data = sp.current_user_recently_played(limit = 25)
     recent = {}

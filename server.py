@@ -142,8 +142,12 @@ def spotifycurrent():
 
     if token:
         results = {}
-        results.update(spotify.current(token, reformat))
-        return jsonify(results)
+        try:
+            results.update(spotify.current(token, reformat))
+            return jsonify(results)
+        except:
+            results.update({'current': None})
+            return jsonify(results)
     return directory('No Token Returned. ', 'spotify.html')
 
 
